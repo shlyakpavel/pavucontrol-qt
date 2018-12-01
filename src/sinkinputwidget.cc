@@ -39,8 +39,7 @@ SinkInputWidget::SinkInputWidget(MainWindow *parent) :
     terminate->setText(tr("Terminate Playback"));
 }
 
-SinkInputWidget::~SinkInputWidget(void) {
-}
+SinkInputWidget::~SinkInputWidget(void) = default;
 
 void SinkInputWidget::setSinkIndex(uint32_t idx) {
     mSinkIndex = idx;
@@ -94,9 +93,8 @@ void SinkInputWidget::onKill() {
 }
 
 void SinkInputWidget::buildMenu() {
-  for (auto i = mpMainWindow->sinkWidgets.begin(); i != mpMainWindow->sinkWidgets.end(); ++i) {
-      menu->addAction(new SinkMenuItem{this, i->second->description, i->second->index, i->second->index == mSinkIndex, menu});
-  }
+  for (auto &&w : mpMainWindow->sinkWidgets)
+      menu->addAction(new SinkMenuItem{this, w.second->description, w.second->index, w.second->index == mSinkIndex, menu});
 }
 
 void SinkInputWidget::SinkMenuItem::onToggle() {

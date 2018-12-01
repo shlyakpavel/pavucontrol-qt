@@ -56,7 +56,7 @@ static pa_mainloop_api* api = nullptr;
 static int n_outstanding = 0;
 static int default_tab = 0;
 static bool retry = false;
-static int reconnect_timeout = 1;
+static auto reconnect_timeout = 1;
 
 void show_error(const char *txt) {
     char buf[256];
@@ -78,7 +78,7 @@ static void dec_outstanding(MainWindow *w) {
 }
 
 void card_cb(pa_context *, const pa_card_info *i, int eol, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         if (pa_context_errno(context) == PA_ERR_NOENTITY)
@@ -101,7 +101,7 @@ static void ext_device_restore_subscribe_cb(pa_context *c, pa_device_type_t type
 #endif
 
 void sink_cb(pa_context *c, const pa_sink_info *i, int eol, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         if (pa_context_errno(context) == PA_ERR_NOENTITY)
@@ -124,7 +124,7 @@ void sink_cb(pa_context *c, const pa_sink_info *i, int eol, void *userdata) {
 }
 
 void source_cb(pa_context *, const pa_source_info *i, int eol, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         if (pa_context_errno(context) == PA_ERR_NOENTITY)
@@ -143,7 +143,7 @@ void source_cb(pa_context *, const pa_source_info *i, int eol, void *userdata) {
 }
 
 void sink_input_cb(pa_context *, const pa_sink_input_info *i, int eol, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         if (pa_context_errno(context) == PA_ERR_NOENTITY)
@@ -162,7 +162,7 @@ void sink_input_cb(pa_context *, const pa_sink_input_info *i, int eol, void *use
 }
 
 void source_output_cb(pa_context *, const pa_source_output_info *i, int eol, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         if (pa_context_errno(context) == PA_ERR_NOENTITY)
@@ -179,11 +179,11 @@ void source_output_cb(pa_context *, const pa_source_output_info *i, int eol, voi
              * let's open one that isn't empty */
             if (default_tab != -1) {
                 if (default_tab < 1 || default_tab > w->notebook->count()) {
-                    if (w->sinkInputWidgets.size() > 0)
+                    if (!w->sinkInputWidgets.empty())
                         w->notebook->setCurrentIndex(0);
-                    else if (w->sourceOutputWidgets.size() > 0)
+                    else if (!w->sourceOutputWidgets.empty())
                         w->notebook->setCurrentIndex(1);
-                    else if (w->sourceWidgets.size() > 0 && w->sinkWidgets.size() == 0)
+                    else if (!w->sourceWidgets.empty() && w->sinkWidgets.empty())
                         w->notebook->setCurrentIndex(3);
                     else
                         w->notebook->setCurrentIndex(2);
@@ -202,7 +202,7 @@ void source_output_cb(pa_context *, const pa_source_output_info *i, int eol, voi
 }
 
 void client_cb(pa_context *, const pa_client_info *i, int eol, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         if (pa_context_errno(context) == PA_ERR_NOENTITY)
@@ -221,7 +221,7 @@ void client_cb(pa_context *, const pa_client_info *i, int eol, void *userdata) {
 }
 
 void server_info_cb(pa_context *, const pa_server_info *i, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (!i) {
         show_error(QObject::tr("Server info callback failure").toUtf8().constData());
@@ -238,7 +238,7 @@ void ext_stream_restore_read_cb(
         int eol,
         void *userdata) {
 
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         dec_outstanding(w);
@@ -256,7 +256,7 @@ void ext_stream_restore_read_cb(
 }
 
 static void ext_stream_restore_subscribe_cb(pa_context *c, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
     pa_operation *o;
 
     if (!(o = pa_ext_stream_restore_read(c, ext_stream_restore_read_cb, w))) {
@@ -274,7 +274,7 @@ void ext_device_restore_read_cb(
         int eol,
         void *userdata) {
 
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         dec_outstanding(w);
@@ -292,7 +292,7 @@ void ext_device_restore_read_cb(
 }
 
 static void ext_device_restore_subscribe_cb(pa_context *c, pa_device_type_t type, uint32_t idx, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
     pa_operation *o;
 
     if (type != PA_DEVICE_TYPE_SINK)
@@ -313,7 +313,7 @@ void ext_device_manager_read_cb(
         int eol,
         void *userdata) {
 
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (eol < 0) {
         dec_outstanding(w);
@@ -332,7 +332,7 @@ void ext_device_manager_read_cb(
 }
 
 static void ext_device_manager_subscribe_cb(pa_context *c, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
     pa_operation *o;
 
     if (!(o = pa_ext_device_manager_read(c, ext_device_manager_read_cb, w))) {
@@ -344,7 +344,7 @@ static void ext_device_manager_subscribe_cb(pa_context *c, void *userdata) {
 }
 
 void subscribe_cb(pa_context *c, pa_subscription_event_type_t t, uint32_t index, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
         case PA_SUBSCRIPTION_EVENT_SINK:
@@ -442,7 +442,7 @@ void subscribe_cb(pa_context *c, pa_subscription_event_type_t t, uint32_t index,
 gboolean connect_to_pulse(gpointer userdata);
 
 void context_state_callback(pa_context *c, void *userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     g_assert(c);
 
@@ -598,7 +598,7 @@ pa_context* get_context(void) {
 }
 
 gboolean connect_to_pulse(gpointer userdata) {
-    MainWindow *w = static_cast<MainWindow*>(userdata);
+    auto *w = static_cast<MainWindow*>(userdata);
 
     if (context)
         return false;
@@ -684,7 +684,7 @@ int main(int argc, char *argv[]) {
 
     // ca_context_set_driver(ca_gtk_context_get(), "pulse");
 
-    MainWindow* mainWindow = new MainWindow();
+    auto* mainWindow = new MainWindow();
     if(parser.isSet(maximizeOption))
         mainWindow->showMaximized();
 

@@ -46,8 +46,7 @@ SourceOutputWidget::SourceOutputWidget(MainWindow *parent) :
 }
 
 
-SourceOutputWidget::~SourceOutputWidget(void) {
-}
+SourceOutputWidget::~SourceOutputWidget(void) = default;
 
 void SourceOutputWidget::setSourceIndex(uint32_t idx) {
     mSourceIndex = idx;
@@ -104,9 +103,8 @@ void SourceOutputWidget::onKill() {
 
 
 void SourceOutputWidget::buildMenu() {
-  for (auto i = mpMainWindow->sourceWidgets.begin(); i != mpMainWindow->sourceWidgets.end(); ++i) {
-      menu->addAction(new SourceMenuItem{this, i->second->description, i->second->index, i->second->index == mSourceIndex, menu});
-  }
+  for (auto &&sw : mpMainWindow->sourceWidgets)
+      menu->addAction(new SourceMenuItem{this, sw.second->description, sw.second->index, sw.second->index == mSourceIndex, menu});
 }
 
 void SourceOutputWidget::SourceMenuItem::onToggle() {
